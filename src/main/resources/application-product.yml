@@ -1,9 +1,9 @@
 spring:
-  # MySQL - 학교 서버
+  # MySQL - 학교 서버 환경에 맞게 유연하게 설정
   datasource:
-    url: jdbc:mysql://localhost:3306/anabada?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: root
-    password: wnstn4304!
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:anabada}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD} # GitHub 노출 방지를 위해 환경변수 필수 주입
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate    # 운영은 절대 auto DDL 금지
+      ddl-auto: validate    # 운영은 절대 auto DDL 금지 (인수인계 문서 준수)
     show-sql: false         # 운영은 SQL 로그 끔
 
   # Redis - 학교 서버
@@ -30,12 +30,12 @@ spring:
           max-idle: 5
           min-idle: 2
 
-  # Gmail SMTP - 운영 실제 발송
+  # Gmail SMTP - 시스템이 메일을 '보낼 때' 사용하는 구글 인증 정보
   mail:
-    host: smtp.gmail.com # 인증번호를 받을 계쩡
-    port: 587 # smtp 서버의 포트 번호
-    username: smileksa13@gmail.com #
-    password: wwsv qlht aexj ibku    # Gmail 앱 비밀번호 (2단계 인증 후 발급)
+    host: smtp.gmail.com          # 구글 SMTP 발송 서버 주소 (고정)
+    port: 587                    # SMTP 포트 번호 (고정)
+    username: smileksa13@gmail.com # 메일을 '보내는' 시스템 계정
+    password: ${MAIL_APP_PASSWORD} # 구글 앱 비밀번호 (보안을 위해 환경변수 처리)
     properties:
       mail:
         smtp:
@@ -54,12 +54,12 @@ logging:
     org.hibernate.SQL: WARN
     root: WARN
   file:
-    name: /var/log/anabada/app.log   # 학교 서버 로그 파일 경로
+    name: /var/log/anabada/app.log   # 학교 서버 로그 파일 저장 경로
   logback:
     rollingpolicy:
       max-file-size: 100MB
       max-history: 30
 
-# 운영은 실제 이메일 발송
+# 운영은 실제 이메일 발송 진행
 email-auth:
   mock-send: false
