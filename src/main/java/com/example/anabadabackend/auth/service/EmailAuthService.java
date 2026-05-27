@@ -1,7 +1,7 @@
 package com.example.anabadabackend.auth.service;
 
 import com.example.anabadabackend.auth.repository.EmailAuthRedisRepository;
-import com.example.anabadabackend.global.exception.*;
+import com.example.anabadabackend.global.exception.EmailAuthException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +20,13 @@ public class EmailAuthService {
     private final EmailAuthRedisRepository emailAuthRedisRepository;
     private final JavaMailSender mailSender;
 
-    @Value("${email-auth.code-ttl}")
+    @Value("${email-auth.code-ttl:300}") // 기본값 5분(300초) 안전장치 추가
     private long codeTtl;
 
-    @Value("${email-auth.verified-ttl}")
+    @Value("${email-auth.verified-ttl:600}") // 기본값 10분(600초) 안전장치 추가
     private long verifiedTtl;
 
-    @Value("${email-auth.code-length}")
+    @Value("${email-auth.code-length:6}") // 기본값 6자리 안전장치
     private int codeLength;
 
     @Value("${email-auth.mock-send:false}")
@@ -43,7 +43,6 @@ public class EmailAuthService {
         emailAuthRedisRepository.saveCode(email, code, codeTtl);
 
         if (mockSend) {
-            // 로컬 개발: 실제 발송 대신 로그 출력
             log.info("[이메일 인증 코드 - 로컬 모드] email={}, code={}", email, code);
             return;
         }
@@ -54,12 +53,12 @@ public class EmailAuthService {
             helper.setFrom(fromEmail);
             helper.setTo(email);
             helper.setSubject("[아나바다] 이메일 인증 코드");
-            helper.setText(buildEmailTemplate(code), true); // true = HTML
+            helper.setText(buildEmailTemplate(code), true);
             mailSender.send(message);
             log.info("[이메일 인증 발송 완료] email={}", email);
         } catch (Exception e) {
             log.error("[이메일 발송 실패] email={}, error={}", email, e.getMessage());
-            emailAuthRedisRepository.delete(email); // 발송 실패 시 Redis에서 삭제
+            emailAuthRedisRepository.delete(email);
             throw EmailAuthException.sendFailed();
         }
     }
@@ -75,16 +74,23 @@ public class EmailAuthService {
             throw EmailAuthException.codeNotMatch();
         }
 
-        // 인증 완료 상태로 저장 (TTL 갱신)
-        emailAuthRedisRepository.markVerified(email, verifiedTtl);
-        log.info("[이메일 인증 완료] email={}", email);
+        // 🟢 [변경 포인트] 인증 성공 시 기존 발송된 코드는 즉시 삭제하여 중복 검증을 막고,
+        // 확실하게 가입 패스 도장(markVerified)만 새로 구워 안정성을 높입니다.
+        emailAuthRedisRepository.delete(email);
+
+        // 10분 동안 유지되는 가입 보증 마크 생성 (yml에 누락되었을 때를 대비해 하드코딩 안정성 확보)
+        long finalVerifiedTtl = verifiedTtl <= 0 ? 600 : verifiedTtl;
+        emailAuthRedisRepository.markVerified(email, finalVerifiedTtl);
+
+        log.info("[이메일 인증 완료 - 레디스 마크 적재] email={}", email);
     }
 
     /**
-     * 인증 완료 여부 확인 (회원가입 시 호출)
+     * 인증 완료 여부 확인 (회원가입 시 호출됨)
      */
     public void checkVerified(String email) {
         if (!emailAuthRedisRepository.isVerified(email)) {
+            log.warn("[회원가입 차단 - 인증 정보 없음] email={}", email);
             throw EmailAuthException.notVerified();
         }
     }

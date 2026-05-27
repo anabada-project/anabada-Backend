@@ -48,14 +48,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
 
+                // 경로별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 1. 로그인, 회원가입, Swagger 문서 등은 로그인 안 해도 볼 수 있게 허용
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/email/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-
-                        // 2. 그 외의 "모든 요청"은 반드시 로그인(인증)을 해야만 접근 가능하도록 변경!
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()  // ← 일단 전체 허용으로 테스트
                 );
         // TODO: JWT 필터 추가 예정
         // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
