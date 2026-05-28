@@ -6,10 +6,8 @@ import com.example.anabadabackend.like.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,16 +18,32 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/{product_id}")
-    public ResponseEntity<ApiResponse<List<LikeResponse>>> toggleProductLike(
-            @PathVariable("product_id") Long productId
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<LikeResponse>>> getUserLikeList(
+            @AuthenticationPrincipal Long realUserId
     ) {
-        Long mockUserId = 1L;
+        List<LikeResponse> responseList = likeService.getLikeListByUser(realUserId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.ok("User like list retrieved successfully.", responseList));
+    }
 
-        List<LikeResponse> responseList = likeService.toggleLike(mockUserId, productId);
+    @PostMapping("/{product_id}")
+    public ResponseEntity<ApiResponse<List<LikeResponse>>> addProductLike(
+            @PathVariable("product_id") Long productId,
+            @AuthenticationPrincipal Long realUserId
+    ) {
+        List<LikeResponse> responseList = likeService.addLike(realUserId, productId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Like added successfully.", responseList));
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Like status updated.", responseList));
+    @DeleteMapping("/{product_id}")
+    public ResponseEntity<ApiResponse<List<LikeResponse>>> deleteProductLike(
+            @PathVariable("product_id") Long productId,
+            @AuthenticationPrincipal Long realUserId
+    ) {
+        List<LikeResponse> responseList = likeService.deleteLike(realUserId, productId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.ok("Like removed successfully.", responseList));
     }
 }
