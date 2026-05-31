@@ -1,6 +1,7 @@
 package com.example.anabadabackend.entity;
 
 import com.example.anabadabackend.entity.enums.Gender;
+import com.example.anabadabackend.entity.enums.Role;
 import com.example.anabadabackend.entity.enums.Specialism;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -48,6 +49,11 @@ public class User {
     @Column(nullable = false, length = 20)
     private String generation;
 
+    // 권한
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Role role;
+
     @Builder
     public User(
             String userId,
@@ -56,7 +62,8 @@ public class User {
             String password,
             Gender gender,
             Specialism specialism,
-            String generation
+            String generation,
+            Role role
     ) {
         this.userId = userId;
         this.email = email;
@@ -65,5 +72,6 @@ public class User {
         this.gender = gender;
         this.specialism = specialism;
         this.generation = generation;
+        this.role = role != null ? role : Role.USER; // 기본값 USER
     }
 }

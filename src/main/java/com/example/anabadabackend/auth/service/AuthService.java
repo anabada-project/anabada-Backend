@@ -5,6 +5,7 @@ import com.example.anabadabackend.auth.dto.SignupRequest;
 import com.example.anabadabackend.auth.dto.TokenResponse;
 import com.example.anabadabackend.auth.repository.UserRepository;
 import com.example.anabadabackend.entity.User;
+import com.example.anabadabackend.entity.enums.Role;
 import com.example.anabadabackend.global.exception.EmailAuthException;
 import com.example.anabadabackend.global.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +41,6 @@ public class AuthService {
         // 이메일 인증 여부 확인
         emailAuthService.checkVerified(request.getEmail());
 
-        // 비밀번호 암호화
-        String encodedPassword =
-                passwordEncoder.encode(request.getPassword());
-
         User user = User.builder()
                 .userId(request.getId())
                 .email(request.getEmail())
@@ -52,6 +49,7 @@ public class AuthService {
                 .gender(request.getGender())
                 .specialism(request.getSpecialism())
                 .generation(request.getGeneration())
+                .role(Role.USER) // 기본 권한 USER
                 .build();
         userRepository.save(user);
 
@@ -83,25 +81,16 @@ public class AuthService {
         }
 
         String accessToken =
-                jwtTokenProvider.createAccessToken(
-                        user.getId()
-                );
+                jwtTokenProvider.createAccessToken(user.getId());
 
         String refreshToken =
-                jwtTokenProvider.createRefreshToken(
-                        user.getId()
-                );
+                jwtTokenProvider.createRefreshToken(user.getId());
 
-        jwtTokenProvider.storeRefreshTokenInRedis(
-                user.getId(),
-                refreshToken
-        );
+        jwtTokenProvider.storeRefreshTokenInRedis(user.getId(), refreshToken);
 
-        return new TokenResponse(
-                accessToken,
-                refreshToken
-        );
+        return new TokenResponse(accessToken, refreshToken);
     }
+
     /**
      * 로그아웃
      */
