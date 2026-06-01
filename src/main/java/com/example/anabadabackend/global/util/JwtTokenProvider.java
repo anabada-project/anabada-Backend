@@ -22,23 +22,33 @@ public class JwtTokenProvider {
     @Value("${jwt.secret:dGhpcy1pcy1hLXNhbXBsZS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tcHJvdmlkZXItYW5hYmFkYS1wcm9qZWN0}")
     private String secretKey;
 
-    @Value("${jwt.access-token-validity:1800000}") // 30분 기본값
+    @Value("${jwt.access-token-validity:1800000}") // 30분
     private long accessTokenValidity;
 
-    @Value("${jwt.refresh-token-validity:1209600000}") // 14일 기본값
+    @Value("${jwt.refresh-token-validity:1209600000}") // 14일
     private long refreshTokenValidity;
 
     private Key key;
 
     @PostConstruct
     protected void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        this.key = Keys.hmacShaKeyFor(
+                secretKey.getBytes(StandardCharsets.UTF_8)
+        );
     }
 
-    public String createAccessToken(String email) {
-        Claims claims = Jwts.claims().setSubject(email);
+    /**
+     * Access Token 생성
+     */
+    public String createAccessToken(Long id) {
+
+        Claims claims = Jwts.claims()
+                .setSubject(String.valueOf(id));
+
         Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenValidity);
+
+        Date validity =
+                new Date(now.getTime() + accessTokenValidity);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -49,61 +59,84 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Refresh Token 생성 및 Redis 자동 저장
+     * Refresh Token 생성
      */
-    public String createRefreshToken(String email) {
+    public String createRefreshToken(Long id) {
+
         Date now = new Date();
-        Date validity = new Date(now.getTime() + refreshTokenValidity);
+
+        Date validity =
+                new Date(now.getTime() + refreshTokenValidity);
 
         String refreshToken = Jwts.builder()
+                .setSubject(String.valueOf(id))
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // 🟢 기존 규칙 유지: user:refresh:[이메일]
-        storeRefreshTokenInRedis(email, refreshToken);
+        // Redis 저장
+        storeRefreshTokenInRedis(id, refreshToken);
 
         return refreshToken;
     }
 
     /**
-     * 🟢 [AuthService 호환 추가] Redis에 Refresh Token 저장
+     * Redis에 Refresh Token 저장
      */
-    public void storeRefreshTokenInRedis(String email, String refreshToken) {
+    public void storeRefreshTokenInRedis(
+            Long id,
+            String refreshToken
+    ) {
+
         redisTemplate.opsForValue().set(
-                "user:refresh:" + email,
+                "user:refresh:" + id,
                 refreshToken,
                 refreshTokenValidity,
                 TimeUnit.MILLISECONDS
         );
     }
 
+    /**
+     * 토큰 검증
+     */
     public boolean validateToken(String token) {
+
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+
+        } catch (
+                JwtException |
+                IllegalArgumentException e
+        ) {
             return false;
         }
     }
 
-    public String getEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+    /**
+     * 토큰에서 userId 추출
+     */
+    public Long getUserId(String token) {
+
+        String subject = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
+        return Long.parseLong(subject);
     }
 
     /**
-     * 기존 삭제 메서드
+     * Refresh Token 삭제
      */
-    public void deleteRefreshToken(String email) {
-        redisTemplate.delete("user:refresh:" + email);
-    }
-
-    /**
-     * 🟢 [AuthService 호환 추가] 로그아웃 시 Redis에서 토큰 삭제
-     */
-    public void deleteRefreshTokenFromRedis(String email) {
-        deleteRefreshToken(email);
+    public void deleteRefreshTokenFromRedis(Long id) {
+        redisTemplate.delete("user:refresh:" + id);
     }
 }

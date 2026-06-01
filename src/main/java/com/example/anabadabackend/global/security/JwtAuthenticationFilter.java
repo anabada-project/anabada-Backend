@@ -41,11 +41,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
 
         // 토큰이 존재하고, 유효성 검증을 통과했다면 인증 객체를 생성하여 세션에 넣어줍니다.
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            String email = jwtTokenProvider.getEmail(token);
+            Long userId = jwtTokenProvider.getUserId(token);
 
             // 로그인 상태를 유지해주는 핵심 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
 
             // 스프링 시큐리티 시스템 장부에 "이 유저 인증됨"이라고 기록
             SecurityContextHolder.getContext().setAuthentication(authentication);
