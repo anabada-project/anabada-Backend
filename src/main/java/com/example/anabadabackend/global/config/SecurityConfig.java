@@ -48,11 +48,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
 
-                // 경로별 권한 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .anyRequest().permitAll()  // ← 일단 전체 허용으로 테스트
                 );
         // TODO: JWT 필터 추가 예정
         // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
