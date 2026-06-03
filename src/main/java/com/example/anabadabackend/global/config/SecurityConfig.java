@@ -13,7 +13,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     /**
      * 인증 없이 접근 가능한 경로
      * - 이메일 인증 API (회원가입 전 단계)
@@ -48,7 +47,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
 
+                // 인가 설정
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_URLS).permitAll()
+                        .anyRequest().authenticated()
                 );
+
         // TODO: JWT 필터 추가 예정
         // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
