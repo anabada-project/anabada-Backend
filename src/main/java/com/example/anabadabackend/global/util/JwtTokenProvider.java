@@ -41,14 +41,9 @@ public class JwtTokenProvider {
      * Access Token 생성
      */
     public String createAccessToken(Long id) {
-
-        Claims claims = Jwts.claims()
-                .setSubject(String.valueOf(id));
-
+        Claims claims = Jwts.claims().setSubject(String.valueOf(id));
         Date now = new Date();
-
-        Date validity =
-                new Date(now.getTime() + accessTokenValidity);
+        Date validity = new Date(now.getTime() + accessTokenValidity);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -62,11 +57,8 @@ public class JwtTokenProvider {
      * Refresh Token 생성
      */
     public String createRefreshToken(Long id) {
-
         Date now = new Date();
-
-        Date validity =
-                new Date(now.getTime() + refreshTokenValidity);
+        Date validity = new Date(now.getTime() + refreshTokenValidity);
 
         String refreshToken = Jwts.builder()
                 .setSubject(String.valueOf(id))
@@ -75,7 +67,6 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Redis 저장
         storeRefreshTokenInRedis(id, refreshToken);
 
         return refreshToken;
@@ -84,11 +75,7 @@ public class JwtTokenProvider {
     /**
      * Redis에 Refresh Token 저장
      */
-    public void storeRefreshTokenInRedis(
-            Long id,
-            String refreshToken
-    ) {
-
+    public void storeRefreshTokenInRedis(Long id, String refreshToken) {
         redisTemplate.opsForValue().set(
                 "user:refresh:" + id,
                 refreshToken,
@@ -98,22 +85,23 @@ public class JwtTokenProvider {
     }
 
     /**
+     * Redis에 저장된 Refresh Token 조회
+     */
+    public String getRefreshTokenFromRedis(Long id) {
+        return redisTemplate.opsForValue().get("user:refresh:" + id);
+    }
+
+    /**
      * 토큰 검증
      */
     public boolean validateToken(String token) {
-
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
-
             return true;
-
-        } catch (
-                JwtException |
-                IllegalArgumentException e
-        ) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
@@ -122,7 +110,6 @@ public class JwtTokenProvider {
      * 토큰에서 userId 추출
      */
     public Long getUserId(String token) {
-
         String subject = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

@@ -18,29 +18,18 @@ public class LikeService {
 
     private final LikeRepository likeRepository;
 
-    public List<LikeResponse> getLikeListByUser(Long userId) {
-        return likeRepository.findByUserIdOrderByFavoriteTimeDesc(userId).stream()
-                .map(LikeResponse::from)
-                .collect(Collectors.toList());
-    }
-
     @Transactional
-    public List<LikeResponse> addLike(Long userId, Long productId) {
+    public List<LikeResponse> toggleLike(Long userId, Long productId) {
         Optional<Like> alreadyLike = likeRepository.findByUserIdAndProductId(userId, productId);
 
-        if (alreadyLike.isEmpty()) {
+        if (alreadyLike.isPresent()) {
+            likeRepository.delete(alreadyLike.get());
+        } else {
             likeRepository.save(new Like(userId, productId));
         }
 
-        return getLikeListByUser(userId);
-    }
-
-    @Transactional
-    public List<LikeResponse> deleteLike(Long userId, Long productId) {
-        Optional<Like> alreadyLike = likeRepository.findByUserIdAndProductId(userId, productId);
-
-        alreadyLike.ifPresent(likeRepository::delete);
-
-        return getLikeListByUser(userId);
+        return likeRepository.findByUserId(userId).stream()
+                .map(LikeResponse::from)
+                .collect(Collectors.toList());
     }
 }

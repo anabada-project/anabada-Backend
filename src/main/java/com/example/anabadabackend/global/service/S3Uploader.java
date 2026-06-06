@@ -1,4 +1,4 @@
-package com.example.anabadabackend.global.global.service;
+package com.example.anabadabackend.global.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;

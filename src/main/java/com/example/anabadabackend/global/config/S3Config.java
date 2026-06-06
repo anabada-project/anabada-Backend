@@ -1,4 +1,4 @@
-package com.example.anabadabackend.global.global.config;
+package com.example.anabadabackend.global.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

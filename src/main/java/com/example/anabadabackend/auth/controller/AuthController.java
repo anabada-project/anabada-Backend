@@ -3,6 +3,7 @@ package com.example.anabadabackend.auth.controller;
 import com.example.anabadabackend.auth.dto.SigninRequest;
 import com.example.anabadabackend.auth.dto.SignupRequest;
 import com.example.anabadabackend.auth.dto.TokenResponse;
+import com.example.anabadabackend.auth.dto.*;
 import com.example.anabadabackend.auth.service.AuthService;
 import com.example.anabadabackend.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -21,7 +22,6 @@ public class AuthController {
 
     /**
      * 회원가입 API (POST /api/auth/signup)
-     * 201 Created 반환
      */
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequest request) {

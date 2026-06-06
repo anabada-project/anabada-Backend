@@ -1,4 +1,4 @@
-package com.example.anabadabackend.global.global.dto;
+package com.example.anabadabackend.global.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
