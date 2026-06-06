@@ -1,9 +1,9 @@
 package com.example.anabadabackend.account.service;
 
-import com.example.anabadabackend.account.repository.AccountRepository;
+import com.example.anabadabackend.account.dto.AccountResponse;
+import com.example.anabadabackend.auth.repository.UserRepository;
 import com.example.anabadabackend.entity.User;
 import com.example.anabadabackend.global.exception.EmailAuthException;
-import com.example.anabadabackend.account.dto.AccountResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AccountService {
 
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
-    public AccountResponseDto getMyInfo(Long id) {
-        User user = accountRepository.findById(id)
-                .orElseThrow(() ->
-                        new EmailAuthException("존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND));
-        return new AccountResponseDto(user);
+
+    public AccountResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EmailAuthException(
+                        "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        return new AccountResponse(user);
     }
 }

@@ -3,14 +3,13 @@ package com.example.anabadabackend.entity;
 import com.example.anabadabackend.entity.enums.Gender;
 import com.example.anabadabackend.entity.enums.Specialism;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
@@ -18,37 +17,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 로그인 아이디
     @Column(nullable = false, unique = true, length = 30)
     private String userId;
 
-    // 이메일
     @Column(nullable = false, unique = true, length = 30)
     private String email;
 
-    // 이름
     @Column(nullable = false, length = 30)
     private String name;
 
-    // 비밀번호
     @Column(nullable = false, length = 100)
     private String password;
 
-    // 성별
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Gender gender;
 
-    // 전공
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private Specialism specialism;
 
-    // 기수
     @Column(nullable = false, length = 20)
     private String generation;
 
-    @Builder
     public User(
             String userId,
             String email,
@@ -65,5 +56,12 @@ public class User {
         this.gender = gender;
         this.specialism = specialism;
         this.generation = generation;
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 }
