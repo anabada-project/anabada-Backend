@@ -19,9 +19,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    /**
-     * 🟢 [변경 핵심] 프리패스 API 주소들은 토큰이 없으므로 이 필터 검증을 그냥 건너뛰게 만듭니다.
-     */
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
