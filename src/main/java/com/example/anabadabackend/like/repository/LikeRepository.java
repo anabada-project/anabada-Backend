@@ -1,4 +1,4 @@
-package com.example.anabadabackend.like.repositoty;
+package com.example.anabadabackend.like.repository;
 
 import com.example.anabadabackend.like.entity.Like;
 import org.springframework.data.jpa.repository.JpaRepository;

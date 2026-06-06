@@ -3,17 +3,19 @@ spring:
     name: anabada
 
   profiles:
-    active: local
+    active: local  # 로컬 개발 시 기본값, 서버에서는 prod로 override
 
+  # JPA 공통 설정
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate   # prod 안전: 스키마 변경 없이 검증만
     properties:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
     open-in-view: false
 
+  # 파일 업로드 제한
   servlet:
     multipart:
       max-file-size: 10MB
@@ -24,12 +26,14 @@ server:
   servlet:
     context-path: /
 
+# 공통 로그 설정
 logging:
   level:
     com.anabada: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
 
+# Swagger UI 설정
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -40,13 +44,14 @@ springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
 
+
 cloud:
   aws:
     credentials:
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}s
+      access-key:
+      secret-key:
     region:
-      static: ap-southeast-2
+      static: ap-southeast-2   # 서울 → 시드니로 변경
     s3:
       bucket: anabada-images
     stack:

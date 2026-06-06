@@ -45,8 +45,8 @@ email-auth:
 cloud:              # ← 맨 왼쪽에 붙어야 함 (들여쓰기 없음)
   aws:
     credentials:
-    access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY}
+      access-key:
+      secret-key:
     region:
       static: ap-northeast-2
     s3:

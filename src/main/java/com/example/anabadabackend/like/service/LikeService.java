@@ -2,7 +2,7 @@ package com.example.anabadabackend.like.service;
 
 import com.example.anabadabackend.like.dto.LikeResponse;
 import com.example.anabadabackend.like.entity.Like;
-import com.example.anabadabackend.like.repositoty.LikeRepository;
+import com.example.anabadabackend.like.repository.LikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
