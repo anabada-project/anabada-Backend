@@ -27,11 +27,23 @@ public class CommentResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime commentTime;
 
-    public CommentResponse(Comment comment) {
+    @JsonProperty("nickname")
+    private final String nickname;
+
+    @JsonProperty("is_writer")
+    private final boolean isWriter;     // 게시글 작성자인지 여부
+
+    @JsonProperty("is_mine")
+    private final boolean isMine;       // 로그인한 사용자가 쓴 댓글인지 여부
+
+    public CommentResponse(Comment comment, String nickname, Long productOwnerId, Long currentUserId) {
         this.commentId = comment.getId();
         this.parentCommentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
         this.commentContent = comment.getCommentContent();
         this.createdAt = comment.getCreatedAt();
         this.commentTime = comment.getCreatedAt();
+        this.nickname = nickname;
+        this.isWriter = comment.getUserId().equals(productOwnerId);
+        this.isMine = comment.getUserId().equals(currentUserId);
     }
 }
