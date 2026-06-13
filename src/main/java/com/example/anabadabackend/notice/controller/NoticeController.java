@@ -18,7 +18,7 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    // 공지 작성 (POST /api/notice) - ADMIN
+
     @PostMapping
     public ResponseEntity<ApiResponse<NoticeResponseDto>> create(
             @RequestBody NoticeRequestDto request) {
@@ -27,16 +27,17 @@ public class NoticeController {
                 .body(ApiResponse.ok("공지사항이 등록되었습니다.", response));
     }
 
-    // 공지 수정 (PATCH /api/notice/{notice_id}) - ADMIN
+
     @PatchMapping("/{notice_id}")
     public ResponseEntity<ApiResponse<NoticeResponseDto>> update(
-            @PathVariable Long notice_id,
+            @PathVariable("notice_id") Long noticeId,
             @RequestBody NoticeRequestDto request) {
-        NoticeResponseDto response = noticeService.update(notice_id, request);
+
+        NoticeResponseDto response = noticeService.update(noticeId, request);
         return ResponseEntity.ok(ApiResponse.ok("공지사항이 수정되었습니다.", response));
     }
 
-    // 공지 전체 조회 (GET /api/notice)
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<NoticeResponseDto>>> getAll() {
         List<NoticeResponseDto> response = noticeService.getAll();

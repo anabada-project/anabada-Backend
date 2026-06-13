@@ -8,15 +8,15 @@ import java.time.LocalDateTime;
 @Getter
 public class NoticeResponseDto {
 
-    private final Long notice_id;
-    private final String notice_title;
-    private final String notice_content;
-    private final LocalDateTime notice_time;
+    private final Long noticeId;
+    private final String noticeTitle;
+    private final String noticeContent;
+    private final LocalDateTime noticeTime;
 
     public NoticeResponseDto(Notice notice) {
-        this.notice_id = notice.getId();
-        this.notice_title = notice.getNoticeTitle();
-        this.notice_content = notice.getNoticeContent();
-        this.notice_time = notice.getNoticeTime();
+        this.noticeId = notice.getId();
+        this.noticeTitle = notice.getNoticeTitle();
+        this.noticeContent = notice.getNoticeContent();
+        this.noticeTime = notice.getNoticeTime();
     }
 }
