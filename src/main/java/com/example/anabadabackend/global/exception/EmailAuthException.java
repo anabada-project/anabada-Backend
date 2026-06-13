@@ -13,6 +13,12 @@ public class EmailAuthException extends RuntimeException {
         this.status = status;
     }
 
+    // 🔴 [추가] 로그인 실패 전용 정적 팩토리 메서드
+    // 보안을 위해 이메일이 틀렸든 비밀번호가 틀렸든 동일한 메시지와 BAD_REQUEST(400)를 반환합니다.
+    public static EmailAuthException loginFailed() {
+        return new EmailAuthException("이메일 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+    }
+
     // 자주 쓰는 케이스 정적 팩토리
     public static EmailAuthException codeNotFound() {
         return new EmailAuthException("인증 코드가 존재하지 않거나 만료되었습니다.", HttpStatus.BAD_REQUEST);
