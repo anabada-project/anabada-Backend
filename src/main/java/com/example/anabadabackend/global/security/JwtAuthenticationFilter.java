@@ -23,12 +23,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-
-        // 🟢 .contains() 또는 주소의 앞부분만 체크하는 방식을 쓰면
-        // 뒤에 슬래시(/)가 붙거나 주소가 미세하게 달라져도 완벽하게 잡아내서 통과시킵니다.
-        return path.contains("/api/auth/email") ||
-                path.contains("/api/auth/signin") ||
-                path.contains("/api/auth/signup");
+        return path.startsWith("/api/auth/email") ||
+                path.startsWith("/api/auth/signin") ||
+                path.startsWith("/api/auth/signup");
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
