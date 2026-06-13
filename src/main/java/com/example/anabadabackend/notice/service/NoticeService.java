@@ -24,7 +24,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDto create(NoticeRequestDto request) {
         Notice notice = Notice.builder()
-                .noticeTitle(request.getNoticeTile())
+                .noticeTitle(request.getNoticeTitle())
                 .noticeContent(request.getNoticeContent())
                 .build();
         return new NoticeResponseDto(noticeRepository.save(notice));
@@ -34,7 +34,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDto update(Long noticeId, NoticeRequestDto request) {
         Notice notice = findNoticeById(noticeId);
-        notice.update(request.getNoticeTile(), request.getNoticeContent());
+        notice.update(request.getNoticeTitle(), request.getNoticeContent());
         return new NoticeResponseDto(notice);
     }
 

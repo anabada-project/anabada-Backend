@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -21,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Transactional(readOnly = true)
 public class AuthService {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final String PASSWORD_CODE_PREFIX = "email:password:";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -28,7 +31,7 @@ public class AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final JavaMailSender mailSender;
 
-    private static final String PASSWORD_CODE_PREFIX = "email:password:";
+
     private static final String PASSWORD_VERIFIED_PREFIX = "email:password:verified:";
 
 
@@ -54,9 +57,7 @@ public class AuthService {
         emailAuthService.deleteVerification(request.getEmail());
     }
 
-    /**
-     * 로그인
-     */
+
     @Transactional
     public TokenResponse signin(SigninRequest request) {
         User user = userRepository.findByUserId(request.getId())
@@ -75,17 +76,12 @@ public class AuthService {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    /**
-     * 로그아웃
-     */
+
     @Transactional
     public void signout(Long id) {
         jwtTokenProvider.deleteRefreshTokenFromRedis(id);
     }
 
-    /**
-     * Access Token 재발급 (RTR 방식)
-     */
     @Transactional
     public TokenResponse reissue(String refreshToken) {
         if (!jwtTokenProvider.validateToken(refreshToken)) {
@@ -106,11 +102,9 @@ public class AuthService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
-    // ── 비밀번호 재설정 ────────────────────────────────────────────
 
-    /**
-     * 비밀번호 재설정 인증코드 발송
-     */
+
+
     @Transactional
     public void sendPasswordResetCode(String email) {
 
@@ -120,9 +114,7 @@ public class AuthService {
                         "가입되지 않은 이메일입니다.", HttpStatus.NOT_FOUND));
 
 
-        java.security.SecureRandom secureRandom = new java.security.SecureRandom();
-        String code = String.format("%06d",secureRandom.nextInt(1000000));
-
+        String code = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
 
         redisTemplate.opsForValue().set(
                 PASSWORD_CODE_PREFIX + email,
@@ -131,7 +123,7 @@ public class AuthService {
                 TimeUnit.MINUTES
         );
 
-        // 이메일 발송
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("[아나바다] 비밀번호 재설정 인증코드");
@@ -139,9 +131,7 @@ public class AuthService {
         mailSender.send(message);
     }
 
-    /**
-     * 비밀번호 재설정 인증코드 검증
-     */
+    @Transactional
     public void verifyPasswordResetCode(String email, String code) {
 
         String storedCode = redisTemplate.opsForValue()
@@ -157,10 +147,10 @@ public class AuthService {
                     "인증코드가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        // 인증코드 삭제
+
         redisTemplate.delete(PASSWORD_CODE_PREFIX + email);
 
-        // 인증완료 표시 (TTL 10분)
+
         redisTemplate.opsForValue().set(
                 PASSWORD_VERIFIED_PREFIX + email,
                 "true",
@@ -169,13 +159,11 @@ public class AuthService {
         );
     }
 
-    /**
-     * 비밀번호 재설정
-     */
+
     @Transactional
     public void resetPassword(PasswordResetRequest request) {
 
-        // 인증완료 여부 확인
+
         String verified = redisTemplate.opsForValue()
                 .get(PASSWORD_VERIFIED_PREFIX + request.getEmail());
 
@@ -184,20 +172,19 @@ public class AuthService {
                     "이메일 인증이 필요합니다.", HttpStatus.BAD_REQUEST);
         }
 
-        // 새 비밀번호 == 확인 비밀번호 일치 여부 확인
+
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new EmailAuthException(
                     "비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        // DB에 새 비밀번호 저장
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new EmailAuthException(
                         "가입되지 않은 이메일입니다.", HttpStatus.NOT_FOUND));
 
         user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
 
-        // 인증완료 키 삭제
+
         redisTemplate.delete(PASSWORD_VERIFIED_PREFIX + request.getEmail());
     }
 }
