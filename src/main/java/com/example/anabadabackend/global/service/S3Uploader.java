@@ -26,9 +26,7 @@ public class S3Uploader {
     private String bucket;
 
 
-    /**
-     * Presigned URL 단건 발급
-     */
+
     public PresignedUrlResponse generatePresignedUrl(String filename, String contentType) {
         String key = "products/" + UUID.randomUUID() + "_" + filename;
 
@@ -46,9 +44,7 @@ public class S3Uploader {
         return new PresignedUrlResponse(uploadUrl, imageUrl);
     }
 
-    /**
-     * Presigned URL 여러 장 발급
-     */
+
     public List<PresignedUrlResponse> generatePresignedUrls(List<String> filenames, List<String> contentTypes) {
         List<PresignedUrlResponse> result = new ArrayList<>();
         for (int i = 0; i < filenames.size(); i++) {
@@ -57,22 +53,18 @@ public class S3Uploader {
         return result;
     }
 
-    /**
-     * 이미지 삭제
-     */
+
     public void deleteImage(String imageUrl) {
-        try {
-            String fileName = imageUrl.substring(imageUrl.indexOf("products/"));
-            amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileName));
-            log.info("[S3 이미지 삭제] fileName={}", fileName);
-        } catch (Exception e) {
-            log.error("[S3 삭제 실패] imageUrl={}, error={}", imageUrl, e.getMessage());
+
+        if (imageUrl == null || !imageUrl.contains("products/")) {
+            return;
         }
+
+        String fileName = imageUrl.substring(imageUrl.indexOf("products/"));
+        amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileName));
     }
 
-    /**
-     * 이미지 여러 장 삭제
-     */
+
     public void deleteImages(List<String> imageUrls) {
         for (String url : imageUrls) {
             deleteImage(url);

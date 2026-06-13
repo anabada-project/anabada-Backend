@@ -31,9 +31,7 @@ public class AuthService {
     private static final String PASSWORD_CODE_PREFIX = "email:password:";
     private static final String PASSWORD_VERIFIED_PREFIX = "email:password:verified:";
 
-    /**
-     * 회원가입
-     */
+
     @Transactional
     public void signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -121,10 +119,11 @@ public class AuthService {
                 .orElseThrow(() -> new EmailAuthException(
                         "가입되지 않은 이메일입니다.", HttpStatus.NOT_FOUND));
 
-        // 6자리 랜덤 코드 생성
-        String code = String.format("%06d", (int) (Math.random() * 1000000));
 
-        // Redis 저장 (TTL 5분)
+        java.security.SecureRandom secureRandom = new java.security.SecureRandom();
+        String code = String.format("%06d",secureRandom.nextInt(1000000));
+
+
         redisTemplate.opsForValue().set(
                 PASSWORD_CODE_PREFIX + email,
                 code,

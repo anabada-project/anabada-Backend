@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NoticeRequestDto {
 
-    private String notice_title;
-    private String notice_content;
+    private String noticeTile;
+    private String noticeContent;
 }

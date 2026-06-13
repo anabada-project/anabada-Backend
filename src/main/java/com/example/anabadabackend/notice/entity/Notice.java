@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "notice")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
 public class Notice {
 
     @Id
