@@ -42,13 +42,13 @@ logging:
 email-auth:
   mock-send: false
 
-cloud:              # ← 맨 왼쪽에 붙어야 함 (들여쓰기 없음)
+cloud:
   aws:
     credentials:
       access-key:
       secret-key:
     region:
-      static: ap-northeast-2
+      static: ap-southeast-2
     s3:
       bucket: anabada-images
     stack:
