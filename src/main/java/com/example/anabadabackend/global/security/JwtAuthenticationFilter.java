@@ -23,18 +23,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/email") ||
-                path.startsWith("/api/auth/signin") ||
-                path.startsWith("/api/auth/signup");
+
+        return path.startsWith("/api/auth/email")
+                || path.startsWith("/api/auth/signin")
+                || path.startsWith("/api/auth/signup")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs");
     }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 헤더에서 토큰 추출
+
         String token = resolveToken(request);
 
-        // 토큰이 존재하고, 유효성 검증을 통과했다면 인증 객체를 생성하여 세션에 넣어줍니다.
+
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Long userId = jwtTokenProvider.getUserId(token);
 
