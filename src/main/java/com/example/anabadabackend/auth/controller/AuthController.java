@@ -20,9 +20,6 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * 회원가입 API (POST /api/auth/signup)
-     */
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
@@ -30,18 +27,14 @@ public class AuthController {
                 .body(ApiResponse.ok("회원가입이 완료되었습니다.", null));
     }
 
-    /**
-     * 로그인 API (POST /api/auth/signin)
-     */
+
     @PostMapping("/signin")
     public ResponseEntity<ApiResponse<TokenResponse>> signin(@Valid @RequestBody SigninRequest request) {
         TokenResponse response = authService.signin(request);
         return ResponseEntity.ok(ApiResponse.ok("로그인에 성공하였습니다.", response));
     }
 
-    /**
-     * 로그아웃 API (POST /api/auth/signout)
-     */
+
     @PostMapping("/signout")
     public ResponseEntity<ApiResponse<Void>> signout(@AuthenticationPrincipal Long id) {
         authService.signout(id);
